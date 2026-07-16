@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 
 const SettingsContext = createContext();
 
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+export const API_BASE_URL = process.env.REACT_APP_API_URL ;
 
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState({
