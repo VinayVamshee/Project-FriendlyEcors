@@ -138,6 +138,32 @@
   color: var(--text-light);
 }
 
+.developer-tag {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--text-light);
+  opacity: 0.75;
+  border: 1px solid var(--border-color);
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+}
+
+.developer-tag a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.developer-tag:hover {
+  border-color: var(--accent);
+  opacity: 1;
+  background-color: var(--hover-bg);
+}
+
+
 @media (max-width: 992px) {
   .footer-top {
     grid-template-columns: 1fr 1fr;

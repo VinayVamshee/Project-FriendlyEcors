@@ -64,6 +64,9 @@ const Footer = () => {
 
       <div className="footer-bottom container">
         <p>&copy; {new Date().getFullYear()} FriendlyEcors. All Rights Reserved. Designed with refinement.</p>
+        <div className="developer-tag">
+          Developed by <a href="https://vinayvamsheeresume.vercel.app/" target="_blank" rel="noopener noreferrer">VinayVamshee</a>
+        </div>
       </div>
     </footer>
   );
