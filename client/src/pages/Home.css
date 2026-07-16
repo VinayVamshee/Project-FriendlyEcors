@@ -234,12 +234,9 @@
 .col-img-box {
   position: relative;
   width: 100%;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
 }
-
-.card-size-0 .col-img-box { height: 480px; }
-.card-size-1 .col-img-box { height: 380px; }
-.card-size-2 .col-img-box { height: 440px; }
 
 .col-img-box img {
   width: 100%;

@@ -29,6 +29,12 @@ const AdminDashboard = () => {
   const [reviews, setReviews] = useState([]);
   const [galleryItems, setGalleryItems] = useState([]);
 
+  // Data Loading states
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingReviews, setLoadingReviews] = useState(true);
+  const [loadingGallery, setLoadingGallery] = useState(true);
+
   // Form states & Modals
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
@@ -47,6 +53,7 @@ const AdminDashboard = () => {
   const [message, setMessage] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [isBusy, setIsBusy] = useState(false);
   const [uploadedImages, setUploadedImages] = useState([]);
   const [galleryImageUrl, setGalleryImageUrl] = useState('');
   const [toast, setToast] = useState({ message: '', type: 'success', visible: false });
@@ -55,7 +62,7 @@ const AdminDashboard = () => {
     setToast({ message: msg, type, visible: true });
     setTimeout(() => {
       setToast(prev => ({ ...prev, visible: false }));
-    }, 5000);
+    }, 4500);
   };
 
   const uploadToImgBB = async (file) => {
@@ -95,22 +102,27 @@ const AdminDashboard = () => {
   }, [admin, settings]);
 
   const fetchCategories = async () => {
+    setLoadingCategories(true);
     try {
       const res = await fetch(`${API_BASE_URL}/categories`);
       const result = await res.json();
       if (result.success) setCategories(result.data);
     } catch (err) { console.error(err); }
+    finally { setLoadingCategories(false); }
   };
 
   const fetchProducts = async () => {
+    setLoadingProducts(true);
     try {
       const res = await fetch(`${API_BASE_URL}/products`);
       const result = await res.json();
       if (result.success) setProducts(result.data);
     } catch (err) { console.error(err); }
+    finally { setLoadingProducts(false); }
   };
 
   const fetchReviews = async () => {
+    setLoadingReviews(true);
     try {
       const res = await fetch(`${API_BASE_URL}/reviews/admin`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -118,14 +130,17 @@ const AdminDashboard = () => {
       const result = await res.json();
       if (result.success) setReviews(result.data);
     } catch (err) { console.error(err); }
+    finally { setLoadingReviews(false); }
   };
 
   const fetchGallery = async () => {
+    setLoadingGallery(true);
     try {
       const res = await fetch(`${API_BASE_URL}/gallery`);
       const result = await res.json();
       if (result.success) setGalleryItems(result.data);
     } catch (err) { console.error(err); }
+    finally { setLoadingGallery(false); }
   };
 
   // Login handler
@@ -187,6 +202,7 @@ const AdminDashboard = () => {
       showToast('Please upload at least one image', 'error');
       return;
     }
+    setIsBusy(true);
     try {
       const includedArray = productForm.included
         ? productForm.included.split(',').map(i => i.trim()).filter(i => i !== '')
@@ -211,30 +227,35 @@ const AdminDashboard = () => {
       });
       const result = await res.json();
       if (result.success) {
-        showToast(editProduct ? 'Product updated successfully.' : 'Product created successfully.', 'success');
+        showToast(editProduct ? '✓ Product updated successfully' : '✓ Product added to catalog', 'success');
         setIsProductModalOpen(false);
         fetchProducts();
       } else {
         showToast(result.message, 'error');
       }
     } catch (err) { showToast(err.message, 'error'); }
+    finally { setIsBusy(false); }
   };
 
   const handleDeleteProduct = async (id) => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
+    setIsBusy(true);
     try {
       const res = await fetch(`${API_BASE_URL}/products/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const result = await res.json();
-      if (result.success) fetchProducts();
-    } catch (err) { console.error(err); }
+      if (result.success) { showToast('✓ Product deleted', 'success'); fetchProducts(); }
+      else showToast(result.message, 'error');
+    } catch (err) { showToast(err.message, 'error'); }
+    finally { setIsBusy(false); }
   };
 
   const handleCategoryCreate = async (e) => {
     e.preventDefault();
     if (!categoryName) return;
+    setIsBusy(true);
     try {
       const res = await fetch(`${API_BASE_URL}/categories`, {
         method: 'POST',
@@ -242,22 +263,25 @@ const AdminDashboard = () => {
         body: JSON.stringify({ name: categoryName })
       });
       const result = await res.json();
-      if (result.success) { setCategoryName(''); fetchCategories(); }
-      else alert(result.message);
-    } catch (err) { console.error(err); }
+      if (result.success) { setCategoryName(''); fetchCategories(); showToast('✓ Category created', 'success'); }
+      else showToast(result.message, 'error');
+    } catch (err) { showToast(err.message, 'error'); }
+    finally { setIsBusy(false); }
   };
 
   const handleDeleteCategory = async (id) => {
     if (!window.confirm('Delete this category?')) return;
+    setIsBusy(true);
     try {
       const res = await fetch(`${API_BASE_URL}/categories/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const result = await res.json();
-      if (result.success) fetchCategories();
-      else alert(result.message);
-    } catch (err) { console.error(err); }
+      if (result.success) { showToast('✓ Category deleted', 'success'); fetchCategories(); }
+      else showToast(result.message, 'error');
+    } catch (err) { showToast(err.message, 'error'); }
+    finally { setIsBusy(false); }
   };
 
   const handleGalleryImageChange = async (e) => {
@@ -272,6 +296,7 @@ const AdminDashboard = () => {
   const handleGallerySubmit = async (e) => {
     e.preventDefault();
     if (!galleryImageUrl) { showToast('Please wait for the image upload to complete', 'error'); return; }
+    setIsBusy(true);
     try {
       const payload = {
         eventName: galleryForm.eventName,
@@ -286,27 +311,32 @@ const AdminDashboard = () => {
       });
       const result = await res.json();
       if (result.success) {
-        showToast('Gallery photo uploaded successfully.', 'success');
+        showToast('✓ Gallery photo uploaded successfully', 'success');
         setGalleryForm({ eventName: '', location: 'Dallas, TX', category: '' });
         setGalleryImageUrl('');
         fetchGallery();
       } else { showToast(result.message, 'error'); }
     } catch (err) { showToast('Gallery upload failed: ' + err.message, 'error'); }
+    finally { setIsBusy(false); }
   };
 
   const handleDeleteGallery = async (id) => {
     if (!window.confirm('Remove this event photo from the gallery?')) return;
+    setIsBusy(true);
     try {
       const res = await fetch(`${API_BASE_URL}/gallery/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const result = await res.json();
-      if (result.success) fetchGallery();
-    } catch (err) { console.error(err); }
+      if (result.success) { showToast('✓ Gallery photo removed', 'success'); fetchGallery(); }
+      else showToast(result.message, 'error');
+    } catch (err) { showToast(err.message, 'error'); }
+    finally { setIsBusy(false); }
   };
 
   const handleModerateReview = async (id, status, isFeatured) => {
+    setIsBusy(true);
     try {
       const res = await fetch(`${API_BASE_URL}/reviews/${id}/status`, {
         method: 'PUT',
@@ -314,29 +344,41 @@ const AdminDashboard = () => {
         body: JSON.stringify({ status, isFeatured })
       });
       const result = await res.json();
-      if (result.success) fetchReviews();
-    } catch (err) { console.error(err); }
+      if (result.success) {
+        const label = isFeatured ? '★ Marked as featured' : status === 'approved' ? '✓ Review approved' : '✓ Review rejected';
+        showToast(label, 'success');
+        fetchReviews();
+      } else showToast(result.message, 'error');
+    } catch (err) { showToast(err.message, 'error'); }
+    finally { setIsBusy(false); }
   };
 
   const handleDeleteReview = async (id) => {
     if (!window.confirm('Delete this review?')) return;
+    setIsBusy(true);
     try {
       const res = await fetch(`${API_BASE_URL}/reviews/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const result = await res.json();
-      if (result.success) fetchReviews();
-    } catch (err) { console.error(err); }
+      if (result.success) { showToast('✓ Review deleted', 'success'); fetchReviews(); }
+      else showToast(result.message, 'error');
+    } catch (err) { showToast(err.message, 'error'); }
+    finally { setIsBusy(false); }
   };
 
   const handleSettingsSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     setErrorMsg('');
-    const result = await updateSettings(settingsForm, token);
-    if (result.success) { setMessage('Settings updated successfully.'); fetchSettings(); }
-    else setErrorMsg(result.message);
+    setIsBusy(true);
+    try {
+      const result = await updateSettings(settingsForm, token);
+      if (result.success) { showToast('✓ Settings saved successfully', 'success'); fetchSettings(); }
+      else showToast(result.message, 'error');
+    } catch (err) { showToast(err.message, 'error'); }
+    finally { setIsBusy(false); }
   };
 
   // ── Auth states ──────────────────────────────────────────────
@@ -526,8 +568,6 @@ const AdminDashboard = () => {
 
       {/* ── Main Content ── */}
       <main className="admin-main">
-        {message  && <div className="toast-success">{message}</div>}
-        {errorMsg && <div className="toast-error">{errorMsg}</div>}
 
         {/* 1. Products Tab */}
         {activeTab === 'products' && (
@@ -542,47 +582,54 @@ const AdminDashboard = () => {
               </button>
             </div>
 
-            <div className="table-responsive">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Featured</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map((prod) => (
-                    <tr key={prod._id}>
-                      <td>
-                        <img src={prod.images[0]} alt={prod.title} className="table-thumbnail" />
-                      </td>
-                      <td className="font-semibold">{prod.title}</td>
-                      <td>{prod.category?.name || 'Unassigned'}</td>
-                      <td>${prod.price} / {prod.duration}</td>
-                      <td>
-                        {prod.featured
-                          ? <span className="featured-badge">★ Featured</span>
-                          : <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>—</span>}
-                      </td>
-                      <td>
-                        <div className="action-buttons">
-                          <button className="btn-edit" title="Edit" onClick={() => handleOpenProductModal(prod)}>
-                            <RiEditLine size={16} />
-                          </button>
-                          <button className="btn-delete" title="Delete" onClick={() => handleDeleteProduct(prod._id)}>
-                            <RiDeleteBin7Line size={16} />
-                          </button>
-                        </div>
-                      </td>
+            {loadingProducts ? (
+              <div className="tab-loading-indicator">
+                <div className="auth-loading-spinner" />
+                <p>Loading products catalog...</p>
+              </div>
+            ) : (
+              <div className="table-responsive">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Image</th>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Price</th>
+                      <th>Featured</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {products.map((prod) => (
+                      <tr key={prod._id}>
+                        <td>
+                          <img src={prod.images[0]} alt={prod.title} className="table-thumbnail" />
+                        </td>
+                        <td className="font-semibold">{prod.title}</td>
+                        <td>{prod.category?.name || 'Unassigned'}</td>
+                        <td>${prod.price} / {prod.duration}</td>
+                        <td>
+                          {prod.featured
+                            ? <span className="featured-badge">★ Featured</span>
+                            : <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>—</span>}
+                        </td>
+                        <td>
+                          <div className="action-buttons">
+                            <button className="btn-edit" title="Edit" onClick={() => handleOpenProductModal(prod)}>
+                              <RiEditLine size={16} />
+                            </button>
+                            <button className="btn-delete" title="Delete" onClick={() => handleDeleteProduct(prod._id)}>
+                              <RiDeleteBin7Line size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
         )}
 
@@ -596,36 +643,43 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            <div className="categories-tab-layout">
-              <form onSubmit={handleCategoryCreate} className="form-card-add">
-                <h3>New Category</h3>
-                <div className="form-group">
-                  <label>Category Name</label>
-                  <input
-                    type="text"
-                    value={categoryName}
-                    onChange={(e) => setCategoryName(e.target.value)}
-                    placeholder="e.g. Flower Walls"
-                    required
-                  />
-                </div>
-                <button type="submit" className="btn-save">Create Category</button>
-              </form>
+            {loadingCategories ? (
+              <div className="tab-loading-indicator">
+                <div className="auth-loading-spinner" />
+                <p>Loading categories...</p>
+              </div>
+            ) : (
+              <div className="categories-tab-layout">
+                <form onSubmit={handleCategoryCreate} className="form-card-add">
+                  <h3>New Category</h3>
+                  <div className="form-group">
+                    <label>Category Name</label>
+                    <input
+                      type="text"
+                      value={categoryName}
+                      onChange={(e) => setCategoryName(e.target.value)}
+                      placeholder="e.g. Flower Walls"
+                      required
+                    />
+                  </div>
+                  <button type="submit" className="btn-save">Create Category</button>
+                </form>
 
-              <div className="categories-list-panel">
-                <h3>Active Categories</h3>
-                <div className="list-items">
-                  {categories.map((cat) => (
-                    <div key={cat._id} className="list-row-item">
-                      <span>{cat.name} <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12 }}>({cat.slug})</span></span>
-                      <button className="btn-delete-row" onClick={() => handleDeleteCategory(cat._id)}>
-                        <RiDeleteBin7Line size={14} />
-                      </button>
-                    </div>
-                  ))}
+                <div className="categories-list-panel">
+                  <h3>Active Categories</h3>
+                  <div className="list-items">
+                    {categories.map((cat) => (
+                      <div key={cat._id} className="list-row-item">
+                        <span>{cat.name} <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12 }}>({cat.slug})</span></span>
+                        <button className="btn-delete-row" onClick={() => handleDeleteCategory(cat._id)}>
+                          <RiDeleteBin7Line size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </section>
         )}
 
@@ -639,78 +693,85 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            <div className="gallery-tab-layout">
-              <form onSubmit={handleGallerySubmit} className="form-card-add">
-                <h3>Upload Event Photo</h3>
-                <div className="form-group">
-                  <label>Event / Setup Title</label>
-                  <input
-                    type="text"
-                    value={galleryForm.eventName}
-                    onChange={(e) => setGalleryForm({ ...galleryForm, eventName: e.target.value })}
-                    placeholder="e.g. Sarah Wedding Decor"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Location</label>
-                  <input
-                    type="text"
-                    value={galleryForm.location}
-                    onChange={(e) => setGalleryForm({ ...galleryForm, location: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Category</label>
-                  <select
-                    value={galleryForm.category}
-                    onChange={(e) => setGalleryForm({ ...galleryForm, category: e.target.value })}
-                  >
-                    {categories.map((cat) => (
-                      <option key={cat._id} value={cat._id}>{cat.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Photo (uploads immediately)</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleGalleryImageChange}
-                    disabled={uploading}
-                    required={!galleryImageUrl}
-                  />
-                  {uploading && <p className="upload-indicator-text">Uploading to ImgBB…</p>}
-                </div>
-                {galleryImageUrl && (
+            {loadingGallery ? (
+              <div className="tab-loading-indicator">
+                <div className="auth-loading-spinner" />
+                <p>Loading gallery items...</p>
+              </div>
+            ) : (
+              <div className="gallery-tab-layout">
+                <form onSubmit={handleGallerySubmit} className="form-card-add">
+                  <h3>Upload Event Photo</h3>
                   <div className="form-group">
-                    <label>Preview</label>
-                    <img src={galleryImageUrl} alt="Gallery Preview" className="gallery-form-preview" />
+                    <label>Event / Setup Title</label>
+                    <input
+                      type="text"
+                      value={galleryForm.eventName}
+                      onChange={(e) => setGalleryForm({ ...galleryForm, eventName: e.target.value })}
+                      placeholder="e.g. Sarah Wedding Decor"
+                      required
+                    />
                   </div>
-                )}
-                <button type="submit" className="btn-save" disabled={uploading || !galleryImageUrl}>
-                  {uploading ? 'Uploading…' : 'Upload Photo'}
-                </button>
-              </form>
-
-              <div>
-                <div className="gallery-admin-grid">
-                  {galleryItems.map((item) => (
-                    <div key={item._id} className="gallery-admin-card">
-                      <img src={item.imageUrl} alt={item.eventName} />
-                      <div className="info">
-                        <h4>{item.eventName}</h4>
-                        <p>{item.location}</p>
-                      </div>
-                      <button className="btn-delete-float" onClick={() => handleDeleteGallery(item._id)}>
-                        <RiDeleteBin7Line size={14} />
-                      </button>
+                  <div className="form-group">
+                    <label>Location</label>
+                    <input
+                      type="text"
+                      value={galleryForm.location}
+                      onChange={(e) => setGalleryForm({ ...galleryForm, location: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Category</label>
+                    <select
+                      value={galleryForm.category}
+                      onChange={(e) => setGalleryForm({ ...galleryForm, category: e.target.value })}
+                    >
+                      {categories.map((cat) => (
+                        <option key={cat._id} value={cat._id}>{cat.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Photo (uploads immediately)</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleGalleryImageChange}
+                      disabled={uploading}
+                      required={!galleryImageUrl}
+                    />
+                    {uploading && <p className="upload-indicator-text">Uploading to ImgBB…</p>}
+                  </div>
+                  {galleryImageUrl && (
+                    <div className="form-group">
+                      <label>Preview</label>
+                      <img src={galleryImageUrl} alt="Gallery Preview" className="gallery-form-preview" />
                     </div>
-                  ))}
+                  )}
+                  <button type="submit" className="btn-save" disabled={uploading || !galleryImageUrl}>
+                    {uploading ? 'Uploading…' : 'Upload Photo'}
+                  </button>
+                </form>
+
+                <div>
+                  <div className="gallery-admin-grid">
+                    {galleryItems.map((item) => (
+                      <div key={item._id} className="gallery-admin-card">
+                        <img src={item.imageUrl} alt={item.eventName} />
+                        <div className="info">
+                          <h4>{item.eventName}</h4>
+                          <p>{item.location}</p>
+                        </div>
+                        <button className="btn-delete-float" onClick={() => handleDeleteGallery(item._id)}>
+                          <RiDeleteBin7Line size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </section>
         )}
 
@@ -724,46 +785,53 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            <div className="reviews-admin-list">
-              {reviews.map((rev) => (
-                <div key={rev._id} className={`review-mod-row ${rev.status}`}>
-                  <div className="meta">
-                    <h4>{rev.author}</h4>
-                    <div className="stars">
-                      {[...Array(5)].map((_, i) => (
-                        <RiStarLine key={i} className={i < rev.rating ? 'active' : ''} />
-                      ))}
+            {loadingReviews ? (
+              <div className="tab-loading-indicator">
+                <div className="auth-loading-spinner" />
+                <p>Loading reviews...</p>
+              </div>
+            ) : (
+              <div className="reviews-admin-list">
+                {reviews.map((rev) => (
+                  <div key={rev._id} className={`review-mod-row ${rev.status}`}>
+                    <div className="meta">
+                      <h4>{rev.author}</h4>
+                      <div className="stars">
+                        {[...Array(5)].map((_, i) => (
+                          <RiStarLine key={i} className={i < rev.rating ? 'active' : ''} />
+                        ))}
+                      </div>
+                      <p className="comment">"{rev.comment}"</p>
                     </div>
-                    <p className="comment">"{rev.comment}"</p>
-                  </div>
 
-                  <div className="controls">
-                    <span className="status-label">Status: {rev.status}</span>
-                    <div className="btn-group">
-                      {rev.status !== 'approved' && (
-                        <button className="btn-approve" onClick={() => handleModerateReview(rev._id, 'approved', rev.isFeatured)}>
-                          <RiCheckLine size={13} /> Approve
+                    <div className="controls">
+                      <span className="status-label">Status: {rev.status}</span>
+                      <div className="btn-group">
+                        {rev.status !== 'approved' && (
+                          <button className="btn-approve" onClick={() => handleModerateReview(rev._id, 'approved', rev.isFeatured)}>
+                            <RiCheckLine size={13} /> Approve
+                          </button>
+                        )}
+                        {rev.status !== 'rejected' && (
+                          <button className="btn-reject" onClick={() => handleModerateReview(rev._id, 'rejected', rev.isFeatured)}>
+                            <RiCloseLine size={13} /> Reject
+                          </button>
+                        )}
+                        <button
+                          className={`btn-feature ${rev.isFeatured ? 'featured' : ''}`}
+                          onClick={() => handleModerateReview(rev._id, rev.status, !rev.isFeatured)}
+                        >
+                          {rev.isFeatured ? '★ Featured' : '☆ Feature'}
                         </button>
-                      )}
-                      {rev.status !== 'rejected' && (
-                        <button className="btn-reject" onClick={() => handleModerateReview(rev._id, 'rejected', rev.isFeatured)}>
-                          <RiCloseLine size={13} /> Reject
+                        <button className="btn-delete-row" onClick={() => handleDeleteReview(rev._id)}>
+                          <RiDeleteBin7Line size={14} />
                         </button>
-                      )}
-                      <button
-                        className={`btn-feature ${rev.isFeatured ? 'featured' : ''}`}
-                        onClick={() => handleModerateReview(rev._id, rev.status, !rev.isFeatured)}
-                      >
-                        {rev.isFeatured ? '★ Featured' : '☆ Feature'}
-                      </button>
-                      <button className="btn-delete-row" onClick={() => handleDeleteReview(rev._id)}>
-                        <RiDeleteBin7Line size={14} />
-                      </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </section>
         )}
 
@@ -985,9 +1053,28 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* ── Global busy/blur overlay ── */}
+      {(isBusy || uploading) && (
+        <div className="admin-busy-overlay">
+          <div className="admin-busy-spinner" />
+          <p className="admin-busy-label">
+            {uploading ? 'Uploading image…' : 'Saving changes…'}
+          </p>
+        </div>
+      )}
+
+      {/* ── Toast notification ── */}
       {toast.visible && (
-        <div className={`floating-toast ${toast.type}`}>
+        <div className={`floating-toast ${toast.type}`} role="alert">
+          <span className={`toast-icon ${toast.type}`}>
+            {toast.type === 'success' ? '✓' : '✕'}
+          </span>
           <p>{toast.message}</p>
+          <button
+            className="toast-dismiss"
+            onClick={() => setToast(prev => ({ ...prev, visible: false }))}
+            aria-label="Dismiss"
+          >✕</button>
         </div>
       )}
 

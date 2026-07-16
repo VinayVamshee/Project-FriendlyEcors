@@ -10,29 +10,52 @@ const Home = () => {
   const [categories, setCategories] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [featuredReviews, setFeaturedReviews] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [catRes, prodRes, revRes] = await Promise.all([
+        const [catRes, prodRes, revRes, allProdRes] = await Promise.all([
           fetch(`${API_BASE_URL}/categories`),
           fetch(`${API_BASE_URL}/products?featured=true`),
           fetch(`${API_BASE_URL}/reviews?featured=true`),
+          fetch(`${API_BASE_URL}/products`),
         ]);
 
         const catData = await catRes.json();
         const prodData = await prodRes.json();
         const revData = await revRes.json();
+        const allProdData = await allProdRes.json();
 
         if (catData.success) setCategories(catData.data);
         if (prodData.success) setFeaturedProducts(prodData.data);
         if (revData.success) setFeaturedReviews(revData.data);
+        if (allProdData.success) setAllProducts(allProdData.data);
       } catch (error) {
         console.error('Error fetching home data:', error);
       }
     };
     fetchData();
   }, []);
+
+  const getCategoryCoverImage = (catId) => {
+    const catProducts = allProducts.filter(p => {
+      const pCatId = p.category?._id || p.category;
+      return pCatId === catId;
+    });
+    if (catProducts.length > 0) {
+      const sorted = [...catProducts].sort((a, b) => {
+        if (a.createdAt && b.createdAt) {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        }
+        return (b._id || '').localeCompare(a._id || '');
+      });
+      if (sorted[0]?.images?.[0]) {
+        return sorted[0].images[0];
+      }
+    }
+    return 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&q=80&w=800';
+  };
 
   return (
     <div className="home-page">
@@ -134,7 +157,7 @@ const Home = () => {
                 className={`collection-editorial-card card-size-${idx}`}
               >
                 <div className="col-img-box">
-                  <img src={cat.coverImage || 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&q=80&w=800'} alt={cat.name} />
+                  <img src={getCategoryCoverImage(cat._id)} alt={cat.name} />
                   <div className="col-overlay-grad"></div>
                 </div>
                 <div className="col-card-meta">

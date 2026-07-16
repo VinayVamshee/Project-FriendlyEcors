@@ -174,13 +174,9 @@
   transition: var(--transition-smooth);
 }
 
-/* Asymmetrical Height Settings */
-.card-height-0 .card-image-frame { height: 440px; }
-.card-height-1 .card-image-frame { height: 350px; }
-.card-height-2 .card-image-frame { height: 390px; }
-
 .card-image-frame {
   width: 100%;
+  aspect-ratio: 4 / 3;
   border-radius: var(--border-radius);
   overflow: hidden;
   position: relative;

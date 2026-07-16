@@ -56,18 +56,18 @@
   font-weight: 600;
 }
 
-/* Asymmetrical Pinterest Masonry Grid */
+/* Uniform Grid for Gallery */
 .gallery-masonry-grid {
-  column-count: 3;
-  column-gap: 32px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
 }
 
 .gallery-item-card {
   position: relative;
   border-radius: var(--border-radius-lg);
   overflow: hidden;
-  margin-bottom: 32px;
-  break-inside: avoid;
+  margin-bottom: 0;
   cursor: pointer;
   border: 1px solid var(--border-color);
   transition: var(--transition-smooth);
@@ -76,7 +76,8 @@
 .gallery-item-card img {
   width: 100%;
   display: block;
-  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
   transition: var(--transition-smooth);
 }
 
@@ -264,13 +265,13 @@
 
 @media (max-width: 1024px) {
   .gallery-masonry-grid {
-    column-count: 2;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 768px) {
   .gallery-masonry-grid {
-    column-count: 1;
+    grid-template-columns: 1fr;
   }
   
   .lightbox-nav {

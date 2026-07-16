@@ -34,6 +34,20 @@
   text-transform: uppercase;
 }
 
+.tab-loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  gap: 16px;
+  color: var(--text-light);
+  font-size: 13.5px;
+}
+
 /* ============================================
    LOGIN PAGE
    ============================================ */
@@ -1130,7 +1144,45 @@
   cursor: not-allowed;
 }
 
-/* ---- Toasts ---- */
+/* ---- Busy overlay (blur backdrop) ---- */
+.admin-busy-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  background: rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  animation: overlayFadeIn 0.15s ease forwards;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.admin-busy-spinner {
+  width: 42px;
+  height: 42px;
+  border: 3px solid rgba(199,164,122,0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+.admin-busy-label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+/* ---- Inline toasts (now unused but kept as safety) ---- */
 .toast-success,
 .toast-error {
   padding: 12px 16px;
@@ -1152,29 +1204,84 @@
   border: 1px solid rgba(212,102,102,0.15);
 }
 
+/* ---- Floating Toast (bottom-right desktop, top-center mobile) ---- */
 .floating-toast {
   position: fixed;
-  bottom: 26px;
-  right: 26px;
+  bottom: 28px;
+  right: 28px;
   z-index: 9999;
-  padding: 13px 20px;
-  border-radius: 10px;
-  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px 13px 14px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
   font-size: 13.5px;
   font-weight: 500;
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  animation: slideInToast 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   color: var(--text-primary);
-  max-width: 320px;
+  max-width: 340px;
+  min-width: 220px;
+  animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.floating-toast p {
+  flex: 1;
+  line-height: 1.4;
 }
 
 .floating-toast.success { border-left: 3px solid var(--success); }
 .floating-toast.error   { border-left: 3px solid var(--danger); }
 
-@keyframes slideInToast {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
+.toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.toast-icon.success {
+  background: rgba(77,141,105,0.12);
+  color: var(--success);
+}
+
+.toast-icon.error {
+  background: rgba(212,102,102,0.12);
+  color: var(--danger);
+}
+
+.toast-dismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 11px;
+  color: var(--text-light);
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.12s, color 0.12s;
+  padding: 0;
+  line-height: 1;
+}
+
+.toast-dismiss:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ---- Upload previews ---- */
@@ -1516,12 +1623,25 @@
     padding: 20px 18px;
   }
 
-  /* ── Floating toast ── */
+  /* ── Floating toast — top-center on mobile ── */
   .floating-toast {
-    bottom: 76px; /* above bottom nav */
-    right: 16px;
-    left: 16px;
-    max-width: 100%;
+    /* Move to top instead of bottom */
+    bottom: auto;
+    top: 70px; /* below the sticky mobile header */
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    max-width: calc(100% - 32px);
+    min-width: 260px;
+    width: max-content;
+    border-radius: 10px;
+    animation: toastDropIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.16);
+  }
+
+  @keyframes toastDropIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(-12px) scale(0.97); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
   }
 
   .toast-success,
