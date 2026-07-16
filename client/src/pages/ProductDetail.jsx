@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { RiWhatsappLine, RiPhoneLine, RiCalendarCheckLine, RiTruckLine, RiFileList2Line } from 'react-icons/ri';
+import { RiWhatsappLine, RiPhoneLine, RiCalendarCheckLine, RiTruckLine } from 'react-icons/ri';
 import { useSettings, API_BASE_URL } from '../context/SettingsContext';
 import './ProductDetail.css';
 
@@ -25,7 +25,6 @@ const ProductDetail = () => {
           setActiveImageIdx(0);
           
           // Fetch related products in same category
-          const categoryId = result.data.category?._id || result.data.category;
           const relatedRes = await fetch(`${API_BASE_URL}/products?category=${result.data.category?.slug || ''}`);
           const relatedResult = await relatedRes.json();
           if (relatedResult.success) {
