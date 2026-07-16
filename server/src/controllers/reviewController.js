@@ -1,5 +1,4 @@
 const Review = require('../models/Review');
-const demo = require('../utils/demoData');
 
 const getApprovedReviews = async (req, res) => {
   try {

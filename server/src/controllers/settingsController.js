@@ -1,5 +1,4 @@
 const Settings = require('../models/Settings');
-const demo = require('../utils/demoData');
 
 const getSettings = async (req, res) => {
   try {

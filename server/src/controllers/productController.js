@@ -1,7 +1,6 @@
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const { handleImageUpload } = require('../middleware/upload');
-const demo = require('../utils/demoData');
 
 const getProducts = async (req, res) => {
   try {

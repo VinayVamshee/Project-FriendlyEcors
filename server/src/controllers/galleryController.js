@@ -1,6 +1,5 @@
 const GalleryItem = require('../models/GalleryItem');
 const { handleImageUpload } = require('../middleware/upload');
-const demo = require('../utils/demoData');
 
 const getGalleryItems = async (req, res) => {
   try {
