@@ -43,7 +43,6 @@ const Navbar = () => {
           <Link to="/products" className={`nav-link ${location.pathname === '/products' ? 'active' : ''}`}>Rentals</Link>
           <Link to="/gallery" className={`nav-link ${location.pathname === '/gallery' ? 'active' : ''}`}>Gallery</Link>
           <Link to="/services" className={`nav-link ${location.pathname === '/services' ? 'active' : ''}`}>Services</Link>
-          <Link to="/about" className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}>About</Link>
           <Link to="/faq" className={`nav-link ${location.pathname === '/faq' ? 'active' : ''}`}>FAQ</Link>
         </div>
 
@@ -76,7 +75,6 @@ const Navbar = () => {
           <Link to="/products">Rentals</Link>
           <Link to="/gallery">Gallery</Link>
           <Link to="/services">Services</Link>
-          <Link to="/about">About</Link>
           <Link to="/faq">FAQ</Link>
           <a
             href={`https://wa.me/${settings.whatsapp}`}

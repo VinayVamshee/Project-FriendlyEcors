@@ -14,8 +14,8 @@ export const SettingsProvider = ({ children }) => {
     hours: 'Mon - Sat: 9:00 AM - 6:00 PM | Sun: Closed',
   });
   
-  // Theme state: dark by default (since luxury/premium brands love clean dark modes)
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+  // Theme state: light by default
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [loading, setLoading] = useState(true);
 
   const fetchSettings = async () => {

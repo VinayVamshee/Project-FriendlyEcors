@@ -99,7 +99,7 @@ const Home = () => {
         <div className="overlap-grid">
           <div className="overlap-img-col">
             <img 
-              src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&q=80&w=900" 
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_Cw6D8iufbqF1ToSiCc-6SxpAySXP-bmalCj7XVLe_VfL9YPf35Iog_w&s=10" 
               alt="Luxury Dining Centerpieces Dallas" 
               className="about-overlap-img"
             />
@@ -113,7 +113,7 @@ const Home = () => {
             <p className="secondary-para">
               Our flow is direct. Select your rental piece, evaluate pricing openly, and text or call our Dallas studio. We handle transport, alignment, and final teardowns.
             </p>
-            <Link to="/about" className="link-outline">Our Philosophy &rarr;</Link>
+
           </div>
         </div>
       </section>

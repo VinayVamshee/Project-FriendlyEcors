@@ -7,7 +7,6 @@ import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import Gallery from './pages/Gallery';
 import Services from './pages/Services';
-import About from './pages/About';
 import FAQ from './pages/FAQ';
 import AdminDashboard from './pages/AdminDashboard';
 import { AuthProvider } from './context/AuthContext';
@@ -43,7 +42,6 @@ const AppContent = () => {
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/services" element={<Services />} />
-          <Route path="/about" element={<About />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/admin" element={<AdminDashboard />} />
         </Routes>

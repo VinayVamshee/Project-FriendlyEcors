@@ -32,7 +32,6 @@ const Footer = () => {
           <Link to="/products">Rental Catalog</Link>
           <Link to="/gallery">Previous Work</Link>
           <Link to="/services">Event Services</Link>
-          <Link to="/about">Our Story</Link>
         </div>
 
         <div className="footer-links-col">
