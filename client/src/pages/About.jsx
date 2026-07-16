@@ -1,9 +1,7 @@
 import React from 'react';
-import { useSettings } from '../context/SettingsContext';
 import './About.css';
 
 const About = () => {
-  const { settings } = useSettings();
 
   return (
     <div className="about-page">
