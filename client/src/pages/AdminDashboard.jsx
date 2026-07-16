@@ -50,8 +50,7 @@ const AdminDashboard = () => {
     phone: '', whatsapp: '', instagram: '', facebook: '', address: '', hours: ''
   });
 
-  const [message, setMessage] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+
   const [uploading, setUploading] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [uploadedImages, setUploadedImages] = useState([]);
@@ -370,8 +369,7 @@ const AdminDashboard = () => {
 
   const handleSettingsSubmit = async (e) => {
     e.preventDefault();
-    setMessage('');
-    setErrorMsg('');
+
     setIsBusy(true);
     try {
       const result = await updateSettings(settingsForm, token);
